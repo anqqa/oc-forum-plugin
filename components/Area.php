@@ -1,9 +1,11 @@
 <?php namespace Klubitus\Forum\Components;
 
+use Auth;
 use Cms\Classes\Page;
 use Klubitus\Forum\Models\Area as AreaModel;
 use Cms\Classes\ComponentBase;
 use Klubitus\Forum\Models\Topic as TopicModel;
+use October\Rain\Exception\ApplicationException;
 use October\Rain\Support\Collection;
 use Redirect;
 use Request;
@@ -56,7 +58,13 @@ class Area extends ComponentBase {
             return $this->area;
         }
 
-        return $this->area = AreaModel::findOrFail((int)$this->property('id'));
+        $this->area = AreaModel::findOrFail((int)$this->property('id'));
+
+        if (!Auth::check() && $this->area->is_private) {
+            throw new ApplicationException('Authenticated users only');
+        }
+
+        return $this->area;
     }
 
 
