@@ -36,6 +36,7 @@ class Plugin extends PluginBase {
      */
     public function registerComponents() {
         return [
+            'Klubitus\Forum\Components\Area'  => 'forumArea',
             'Klubitus\Forum\Components\Areas' => 'forumAreas',
         ];
     }

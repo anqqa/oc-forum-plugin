@@ -1,6 +1,5 @@
 <?php namespace Klubitus\Forum\Components;
 
-use Illuminate\Database\Eloquent\Collection;
 use Klubitus\Forum\Models\Area as AreaModel;
 use Cms\Classes\ComponentBase;
 use Cms\Classes\Page;

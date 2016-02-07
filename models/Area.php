@@ -72,6 +72,7 @@ class Area extends Model {
      *
      * @param  string      $pageName
      * @param  Controller  $controller
+     * @return  string
      */
     public function setUrl($pageName, Controller $controller) {
         $params = [

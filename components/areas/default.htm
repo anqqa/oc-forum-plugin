@@ -1,5 +1,5 @@
-<section class="forum-areas forum-areas--detailed">
-    <table class="table">
+<section class="full forum-areas forum-areas--detailed">
+    <table class="table table--condensed">
         {% for group in areas %}
 
             <thead>
@@ -7,7 +7,7 @@
                     <th><h1>{{ group.name }}</h1></th>
                     <th class="table__count">{{ 'Topics'|_ }}</th>
                     <th class="table__count">{{ 'Posts'|_ }}</th>
-                    <th>{{ 'Recent topic'|_ }}</th>
+                    <th>{{ 'Last post'|_ }}</th>
                 </tr>
             </thead>
 

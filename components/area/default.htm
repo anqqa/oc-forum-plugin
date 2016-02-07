@@ -1,0 +1,53 @@
+<section class="full forum-area">
+
+    {% if topics %}
+        {% partial __SELF__ ~ '::pagination' %}
+    {% endif %}
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>{{ 'Topic'|_ }}</th>
+                <th>{{ 'Replies'|_ }}</th>
+                <th>{{ 'Views'|_ }}</th>
+                <th>{{ 'Last post'|_ }}</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for topic in topics %}
+
+                <tr>
+                    <td>
+                        <h2>
+                            <a href="{{ topic.url }}">{{ topic.name }}</a>
+                        </h2>
+                    </td>
+                    <td>
+                        {{ (topic.post_count - 1)|number_format }}
+                    </td>
+                    <td>
+                        {{ topic.read_count|number_format }}
+                    </td>
+                    <td>
+
+                    </td>
+                </tr>
+
+            {% endfor %}
+
+            {% if not topics|length %}
+                <tr>
+                    <td colspan="4">
+                        {{ 'No topics available.'|_ }}
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+    {% if topics %}
+        {% partial __SELF__ ~ '::pagination' %}
+    {% endif %}
+
+</section>
