@@ -111,6 +111,13 @@ class Topic extends Model {
     }
 
 
+    public function increaseReadCount() {
+        $this->timestamps = false;
+        $this->increment('read_count');
+        $this->timestamps = true;
+    }
+
+
     /**
      * Filter areas.
      *
@@ -134,7 +141,7 @@ class Topic extends Model {
      * @return  QueryBuilder
      */
     public function scopeRecentPosts($query) {
-        return $query->orderBy('updated_at', 'desc');
+        return $query->orderBy('last_post_at', 'desc');
     }
 
 
@@ -182,7 +189,7 @@ class Topic extends Model {
      */
     public function setUrl($pageName, Controller $controller) {
         $params = [
-            'area_id' => $this->id . '-' . Str::slug($this->name)
+            'topic_id' => $this->id . '-' . Str::slug($this->name)
         ];
 
         return $this->url = $controller->pageUrl($pageName, $params);

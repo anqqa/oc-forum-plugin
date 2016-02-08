@@ -1,0 +1,15 @@
+<section class="forum-topics forum-topics--list">
+    <h2>{{ __SELF__.title }}</h2>
+
+    <ol>
+        {% for topic in __SELF__.topics %}
+
+            <li>
+                <a href="{{ topic.url }}">
+                    <span class="date">{{ topic.updated_at.diffForHumans }}</span><span class="title">{{ topic.name }}</span>
+                </a>
+            </li>
+
+        {% endfor %}
+    </ol>
+</section>

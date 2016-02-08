@@ -25,7 +25,7 @@ class Plugin extends PluginBase {
             'description' => 'Forums for Klubitus.',
             'author'      => 'Antti Qvickström',
             'icon'        => 'icon-comments',
-            'homepage'    => 'https://github.com/anqqa/klubitus-octobercms-plugins',
+            'homepage'    => 'https://github.com/anqqa/oc-forum-plugin',
         ];
     }
 
@@ -36,8 +36,10 @@ class Plugin extends PluginBase {
      */
     public function registerComponents() {
         return [
-            'Klubitus\Forum\Components\Area'  => 'forumArea',
-            'Klubitus\Forum\Components\Areas' => 'forumAreas',
+            'Klubitus\Forum\Components\Area'   => 'forumArea',
+            'Klubitus\Forum\Components\Areas'  => 'forumAreas',
+            'Klubitus\Forum\Components\Topic'  => 'forumTopic',
+            'Klubitus\Forum\Components\Topics' => 'forumTopics',
         ];
     }
 
