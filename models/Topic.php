@@ -169,13 +169,67 @@ class Topic extends Model {
         $search = trim($search);
 
         if (strlen($search)) {
-            $query->where(function($query) use ($search) {
-                $query->searchWhere($search, 'name');
 
-                $query->orWhereHas('posts', function($query) use ($search) {
-                    $query->searchWhere($search, 'post');
-                });
+            // Parse search
+            $topic  = [];
+            $post = [];
+            $author = [];
 
+            $words = explode(' ', mb_strtolower($search));
+            foreach ($words as $word) {
+                $tokens = explode(':', $word, 2);
+
+                // Defaults to topic and post
+                if (count($tokens) == 1) {
+                    $topic[] = $post[] = $word;
+
+                    continue;
+                }
+
+                switch ($tokens[0]) {
+                    case 'author':
+                    case 'by':
+                        $author += explode(',', $tokens[1]);
+                        break;
+
+                    case 'post':
+                        $post[] = $tokens[1];
+                        break;
+
+                    case 'topic':
+                        $topic[] = $tokens[1];
+                        break;
+
+                    default:
+                        $topic[] = $post[] = $word;
+
+                }
+            }
+
+            // Search authors?
+            $authors = $author
+                ? User::whereIn(DB::raw('LOWER(username)'), $author)
+                    ->lists('id')
+                : [];
+
+            $query->where(function($query) use ($topic, $post, $authors) {
+                if ($topic) {
+                    $query->searchWhere(implode(' ', $topic), 'name');
+
+                    if ($authors && !$post) {
+                        $query->whereIn('author_id', $authors);
+                    }
+                }
+
+                if ($post) {
+                    $query->orWhereHas('posts', function($query) use ($post, $authors) {
+                        $query->searchWhere(implode(' ', $post), 'post');
+
+                        if ($authors) {
+                            $query->whereIn('author_id', $authors);
+                        }
+                    });
+                }
             });
         }
 
