@@ -1,0 +1,13 @@
+<div class="forum-post__author">
+    {{ post.author.username }}
+</div>
+
+<div class="forum-post__content">
+    <div class="forum-post__meta meta">
+       <a href="#post-{{ post.id }}">{{ post.created_at.diffForHumans }}</a>
+    </div>
+
+    <p class="forum-post__post">
+        {{ post.post|bbcode }}
+    </p>
+</div>

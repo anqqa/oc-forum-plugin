@@ -60,7 +60,7 @@ class Area extends ComponentBase {
 
         $this->area = AreaModel::findOrFail((int)$this->property('id'));
 
-        if (!Auth::check() && $this->area->is_private) {
+        if ($this->area->is_private && !Auth::check()) {
             throw new ApplicationException('Authenticated users only');
         }
 
@@ -77,20 +77,14 @@ class Area extends ComponentBase {
         $this->prepareVars();
 
         $this->page['area'] = $this->getArea();
+        $this->page['title'] = $this->getArea()->name;
 
         return $this->prepareTopics();
     }
 
 
     protected function prepareTopics() {
-        $this->topicPage = $this->page['topicPage'] = $this->property('topicPage');
-    }
-
-
-    protected function prepareVars() {
         if ($area = $this->getArea()) {
-
-            // Load topics
             $currentPage = input('page');
             $search = trim(input('search'));
 
@@ -109,11 +103,9 @@ class Area extends ComponentBase {
 
             // Paginate
             if ($topics) {
-                $query = ['page' => ''];
-
-                if ($search) {
-                    $query['search'] = $search;
-                }
+                $query = [];
+                $search and $query['search'] = $search;
+                $query['page'] = '';
 
                 $paginationUrl = Request::url() . '?' . http_build_query($query);
 
@@ -125,4 +117,10 @@ class Area extends ComponentBase {
             }
         }
     }
+
+
+    protected function prepareVars() {
+        $this->topicPage = $this->page['topicPage'] = $this->property('topicPage');
+    }
+
 }

@@ -2,6 +2,7 @@
 
 use Cms\Classes\Controller;
 use Model;
+use October\Rain\Database\QueryBuilder;
 use October\Rain\Database\Traits\NestedTree;
 use October\Rain\Database\Traits\Validation;
 use Str;
@@ -57,11 +58,23 @@ class Area extends Model {
     ];
 
 
+    /**
+     * Filter public areas.
+     *
+     * @param   QueryBuilder  $query
+     * @return  QueryBuilder
+     */
     public function scopeIsPublic($query) {
         return $query->where('is_private', '<>', true);
     }
 
 
+    /**
+     * Filter visible areas.
+     *
+     * @param   QueryBuilder  $query
+     * @return  QueryBuilder
+     */
     public function scopeIsVisible($query) {
         return $query->where('is_hidden', '<>', true);
     }

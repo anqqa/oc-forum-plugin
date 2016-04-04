@@ -1,0 +1,23 @@
+<section class="full forum-topic">
+    {% if returnUrl %}
+        &larr; <a href="{{ returnUrl }}">{{ 'Back to :area'|_({ area: area.name}) }}</a>
+    {% endif %}
+
+    {% if topic %}
+
+        {% partial "@pagination" %}
+
+        {% partial "@posts" %}
+
+        {% partial "@pagination" %}
+
+    {% elseif area %}
+
+        Create a new topic
+
+    {% else %}
+
+        {{ 'No topic found'|_ }}
+
+    {% endif %}
+</section>

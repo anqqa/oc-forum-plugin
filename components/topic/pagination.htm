@@ -1,0 +1,5 @@
+<div class="pagination">
+    {% partial __SELF__ ~ '::pagination-list' records=posts %}
+    |
+    {{ posts.firstItem|number_format }} - {{ posts.lastItem|number_format }} / {{ posts.total|number_format }}
+</div>

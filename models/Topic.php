@@ -44,7 +44,9 @@ class Topic extends Model {
      * @var array Relations
      */
     public $hasOne = [];
-    public $hasMany = [];
+    public $hasMany = [
+        'posts' => [ 'Klubitus\Forum\Models\Post', 'key' => 'forum_topic_id' ],
+    ];
     public $belongsTo = [
         'area'   => 'Klubitus\Forum\Models\Area',
         'author' => 'RainLab\User\Models\User',
@@ -168,11 +170,12 @@ class Topic extends Model {
 
         if (strlen($search)) {
             $query->where(function($query) use ($search) {
-//                $query->whereHas('posts', function($query) use ($search) {
-//                    $query->searchWhere($search, 'post');
-//                });
+                $query->searchWhere($search, 'name');
 
-                $query->orSearchWhere($search, 'name');
+                $query->orWhereHas('posts', function($query) use ($search) {
+                    $query->searchWhere($search, 'post');
+                });
+
             });
         }
 
@@ -192,7 +195,7 @@ class Topic extends Model {
             'topic_id' => $this->id . '-' . Str::slug($this->name)
         ];
 
-        return $this->url = $controller->pageUrl($pageName, $params);
+        return $this->url = $controller->pageUrl($pageName, $params, false);
     }
 
 }
