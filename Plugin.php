@@ -10,6 +10,7 @@ class Plugin extends PluginBase {
 
     public $require = [
         'Klubitus.BBCode',
+        'Klubitus.Search',
         'RainLab.User',
     ];
 
@@ -38,6 +39,7 @@ class Plugin extends PluginBase {
         return [
             'Klubitus\Forum\Components\Area'   => 'forumArea',
             'Klubitus\Forum\Components\Areas'  => 'forumAreas',
+            'Klubitus\Forum\Components\Search' => 'forumSearch',
             'Klubitus\Forum\Components\Topic'  => 'forumTopic',
             'Klubitus\Forum\Components\Topics' => 'forumTopics',
         ];

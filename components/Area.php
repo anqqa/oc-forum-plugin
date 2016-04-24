@@ -80,13 +80,6 @@ class Area extends ComponentBase {
         $this->page['area'] = $this->getArea();
         $this->page['title'] = $this->getArea()->name;
 
-        if ($highlight = Search::parseQuery(
-            trim(input('search')),
-            ['topic'], ['topic' => 'topic']
-        )) {
-            $this->page['highlight'] = $highlight['topic'];
-        }
-
         return $this->prepareTopics();
     }
 
@@ -138,6 +131,13 @@ class Area extends ComponentBase {
 
     protected function prepareVars() {
         $this->topicPage = $this->page['topicPage'] = $this->property('topicPage');
+
+        if ($highlight = Search::parseQuery(
+            trim(input('search')),
+            ['topic'], ['topic' => 'topic']
+        )) {
+            $this->page['highlight'] = $highlight['topic'];
+        }
     }
 
 }

@@ -119,13 +119,6 @@ class Topic extends ComponentBase {
         $this->page['topic'] = $this->getTopic();
         $this->page['title'] = $this->getTopic()->name;
 
-        if ($highlight = Search::parseQuery(
-            trim(input('search')),
-            ['post'], ['post' => 'post']
-        )) {
-            $this->page['highlight'] = $highlight['post'];
-        }
-
         return $this->preparePosts();
     }
 
@@ -171,5 +164,13 @@ class Topic extends ComponentBase {
 
     protected function prepareVars() {
         $this->areaPage = $this->page['areaPage'] = $this->property('areaPage');
+ 
+        if ($highlight = Search::parseQuery(
+            trim(input('search')),
+            ['post'], ['post' => 'post']
+        )) {
+            $this->page['highlight'] = $highlight['post'];
+        }
     }
+    
 }

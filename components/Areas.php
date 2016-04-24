@@ -72,6 +72,12 @@ class Areas extends ComponentBase {
 
 
     public function onRun() {
+        // @TODO: Cleaner solution
+        // Skip if searching 
+        if (trim(input('search'))) {
+            return;
+        }
+        
         $this->prepareVars();
 
         $this->page['areas'] = $this->listAreas();

@@ -50,10 +50,10 @@ class Topic extends Model {
         'posts' => [ 'Klubitus\Forum\Models\Post', 'key' => 'forum_topic_id' ],
     ];
     public $belongsTo = [
-        'area'   => 'Klubitus\Forum\Models\Area',
-        'author' => 'RainLab\User\Models\User',
+        'area'      => ['Klubitus\Forum\Models\Area', 'key' => 'forum_area_id'],
+        'author'    => 'RainLab\User\Models\User',
         'firstPost' => 'Klubitus\Forum\Models\Post',
-        'lastPost' => 'Klubitus\Forum\Models\Post',
+        'lastPost'  => 'Klubitus\Forum\Models\Post',
     ];
     public $belongsToMany = [];
     public $morphTo = [];
@@ -167,10 +167,10 @@ class Topic extends Model {
      *
      * @param   QueryBuilder  $query
      * @param   string        $search
-     * @param   bool          $topicOnly
+     * @param   bool          $includePosts
      * @return  QueryBuilder
      */
-    public function scopeSearch($query, $search, $topicOnly = false) {
+    public function scopeSearch($query, $search, $includePosts = True) {
         $search = trim($search);
 
         if (strlen($search)) {
@@ -186,7 +186,7 @@ class Topic extends Model {
                     ->lists('id')
                 : [];
 
-            $query->where(function($query) use ($parsed, $authors, $topicOnly) {
+            $query->where(function($query) use ($parsed, $authors, $includePosts) {
                 if (!empty($parsed['topic'])) {
                     $query->searchWhere(implode(' ', $parsed['topic']), 'name');
 
@@ -195,7 +195,7 @@ class Topic extends Model {
                     }
                 }
 
-                if (!empty($parsed['post']) && !$topicOnly) {
+                if ($includePosts && !empty($parsed['post'])) {
                     $query->orWhereHas('posts', function($query) use ($parsed, $authors) {
                         $query->searchWhere(implode(' ', $parsed['post']), 'post');
 

@@ -1,5 +1,6 @@
 <?php namespace Klubitus\Forum\Models;
 
+use Auth;
 use Cms\Classes\Controller;
 use Model;
 use October\Rain\Database\QueryBuilder;
@@ -58,6 +59,34 @@ class Area extends Model {
     ];
 
 
+    /**
+     * Get accessible areas' ids.
+     * 
+     * @param  bool  $isAuthenticated
+     * @return  array
+     */
+    public static function getAccessibleIds($isAuthenticated = null) {
+        static $ids = [];
+        
+        is_null($isAuthenticated) and $isAuthenticated = Auth::check();
+        
+        if ($isAuthenticated) {
+            if (isset($ids['authenticated'])) {
+                return $ids['authenticated'];
+            }
+            
+            return $ids['authenticated'] = self::isVisible()->lists('id');
+        }
+        else {
+            if (isset($ids['unauthenticated'])) {
+                return $ids['unauthenticated'];
+            }
+            
+            return $ids['unauthenticated'] = self::isVisible()->isPublic()->lists('id');
+        }
+    }
+    
+    
     /**
      * Filter public areas.
      *
