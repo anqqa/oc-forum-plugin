@@ -5,6 +5,7 @@ use Cms\Classes\Page;
 use Klubitus\Forum\Models\Area as AreaModel;
 use Klubitus\Forum\Models\Post as PostModel;
 use Klubitus\Forum\Models\Topic as TopicModel;
+use Klubitus\Search\Classes\Search;
 use October\Rain\Exception\ApplicationException;
 use October\Rain\Support\Collection;
 use Redirect;
@@ -117,6 +118,13 @@ class Topic extends ComponentBase {
         $this->page['area'] = $this->getArea();
         $this->page['topic'] = $this->getTopic();
         $this->page['title'] = $this->getTopic()->name;
+
+        if ($highlight = Search::parseQuery(
+            trim(input('search')),
+            ['post'], ['post' => 'post']
+        )) {
+            $this->page['highlight'] = $highlight['post'];
+        }
 
         return $this->preparePosts();
     }

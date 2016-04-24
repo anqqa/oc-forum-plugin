@@ -3,7 +3,7 @@
 use Auth;
 use Cms\Classes\Controller;
 use Db;
-use Klubitus\Forum\Classes\Search;
+use Klubitus\Search\Classes\Search;
 use Model;
 use October\Rain\Database\QueryBuilder;
 use October\Rain\Database\Traits\Validation;
