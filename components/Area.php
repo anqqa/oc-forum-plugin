@@ -2,8 +2,10 @@
 
 use Auth;
 use Cms\Classes\Page;
+use Klubitus\Forum\Classes\Search;
 use Klubitus\Forum\Models\Area as AreaModel;
 use Cms\Classes\ComponentBase;
+use Klubitus\Forum\Models\Post as PostModel;
 use Klubitus\Forum\Models\Topic as TopicModel;
 use October\Rain\Exception\ApplicationException;
 use October\Rain\Support\Collection;
@@ -89,14 +91,23 @@ class Area extends ComponentBase {
             $search = trim(input('search'));
 
             /** @var  Collection  $topics */
-            $topics = TopicModel::areas($area->id)
+            $topics = TopicModel::filterAreas($area->id)
                 ->recentPosts()
                 ->search($search)
                 ->paginate(20, $currentPage);
 
             // Add url
-            $topics->each(function(TopicModel $topic) {
-                $topic->setUrl($this->topicPage, $this->controller);
+            $postSearchTokens = Search::parseQuery(
+                $search,
+                ['post'], ['post' => 'post', 'author' => 'author', 'by' => 'author']
+            );
+            $postSearch = Search::buildQuery($postSearchTokens, ['post']);
+            $topics->each(function(TopicModel $topic) use ($postSearch) {
+                $topic->setUrl(
+                    $this->topicPage,
+                    $this->controller,
+                    $postSearch ? ['search' => $postSearch] : null
+                );
             });
 
             $this->page['topics'] = $this->topics = $topics;

@@ -3,6 +3,7 @@
 use Auth;
 use Cms\Classes\Controller;
 use Db;
+use Klubitus\Forum\Classes\Search;
 use Model;
 use October\Rain\Database\QueryBuilder;
 use October\Rain\Database\Traits\Validation;
@@ -43,13 +44,16 @@ class Topic extends Model {
     /**
      * @var array Relations
      */
-    public $hasOne = [];
+    public $hasOne = [
+    ];
     public $hasMany = [
         'posts' => [ 'Klubitus\Forum\Models\Post', 'key' => 'forum_topic_id' ],
     ];
     public $belongsTo = [
         'area'   => 'Klubitus\Forum\Models\Area',
         'author' => 'RainLab\User\Models\User',
+        'firstPost' => 'Klubitus\Forum\Models\Post',
+        'lastPost' => 'Klubitus\Forum\Models\Post',
     ];
     public $belongsToMany = [];
     public $morphTo = [];
@@ -127,7 +131,7 @@ class Topic extends Model {
      * @param   int|array     $areas
      * @return  QueryBuilder
      */
-    public function scopeAreas($query, $areas) {
+    public function scopeFilterAreas($query, $areas) {
         if (!is_array($areas)) {
             $areas = [$areas];
         }
@@ -163,67 +167,37 @@ class Topic extends Model {
      *
      * @param   QueryBuilder  $query
      * @param   string        $search
+     * @param   bool          $topicOnly
      * @return  QueryBuilder
      */
-    public function scopeSearch($query, $search) {
+    public function scopeSearch($query, $search, $topicOnly = false) {
         $search = trim($search);
 
         if (strlen($search)) {
-
-            // Parse search
-            $topic  = [];
-            $post = [];
-            $author = [];
-
-            $words = explode(' ', mb_strtolower($search));
-            foreach ($words as $word) {
-                $tokens = explode(':', $word, 2);
-
-                // Defaults to topic and post
-                if (count($tokens) == 1) {
-                    $topic[] = $post[] = $word;
-
-                    continue;
-                }
-
-                switch ($tokens[0]) {
-                    case 'author':
-                    case 'by':
-                        $author += explode(',', $tokens[1]);
-                        break;
-
-                    case 'post':
-                        $post[] = $tokens[1];
-                        break;
-
-                    case 'topic':
-                        $topic[] = $tokens[1];
-                        break;
-
-                    default:
-                        $topic[] = $post[] = $word;
-
-                }
-            }
+            $parsed = Search::parseQuery(
+                $search,
+                ['topic', 'post'],
+                ['topic' => 'topic', 'post' => 'post', 'author' => 'author', 'by' => 'author']
+            );
 
             // Search authors?
-            $authors = $author
-                ? User::whereIn(DB::raw('LOWER(username)'), $author)
+            $authors = !empty($parsed['author'])
+                ? User::whereIn(DB::raw('LOWER(username)'), $parsed['author'])
                     ->lists('id')
                 : [];
 
-            $query->where(function($query) use ($topic, $post, $authors) {
-                if ($topic) {
-                    $query->searchWhere(implode(' ', $topic), 'name');
+            $query->where(function($query) use ($parsed, $authors, $topicOnly) {
+                if (!empty($parsed['topic'])) {
+                    $query->searchWhere(implode(' ', $parsed['topic']), 'name');
 
-                    if ($authors && !$post) {
+                    if ($authors && empty($parsed['post'])) {
                         $query->whereIn('author_id', $authors);
                     }
                 }
 
-                if ($post) {
-                    $query->orWhereHas('posts', function($query) use ($post, $authors) {
-                        $query->searchWhere(implode(' ', $post), 'post');
+                if (!empty($parsed['post']) && !$topicOnly) {
+                    $query->orWhereHas('posts', function($query) use ($parsed, $authors) {
+                        $query->searchWhere(implode(' ', $parsed['post']), 'post');
 
                         if ($authors) {
                             $query->whereIn('author_id', $authors);
@@ -242,14 +216,21 @@ class Topic extends Model {
      *
      * @param  string      $pageName
      * @param  Controller  $controller
+     * @param  array       $query
      * @return  string
      */
-    public function setUrl($pageName, Controller $controller) {
+    public function setUrl($pageName, Controller $controller, $query = null) {
         $params = [
             'topic_id' => $this->id . '-' . Str::slug($this->name)
         ];
 
-        return $this->url = $controller->pageUrl($pageName, $params, false);
+        $this->url = $controller->pageUrl($pageName, $params, false);
+
+        if ($query) {
+            $this->url .= '?' . http_build_query($query);
+        }
+
+        return $this->url;
     }
 
 }

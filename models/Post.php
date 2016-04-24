@@ -2,6 +2,7 @@
 
 use Auth;
 use Db;
+use Klubitus\Forum\Classes\Search;
 use Model;
 use October\Rain\Database\QueryBuilder;
 use October\Rain\Database\Traits\Validation;
@@ -48,7 +49,7 @@ class Post extends Model {
      * @var  array  Relations.
      */
     public $belongsTo = [
-        'topic'  => 'Klubitus\Forum\Models\Topic',
+        'topic'  => ['Klubitus\Forum\Models\Topic', 'key' => 'forum_topic_id'],
         'author' => 'RainLab\User\Models\User',
     ];
 
@@ -111,6 +112,18 @@ class Post extends Model {
      * Filter topic.
      *
      * @param   QueryBuilder  $query
+     * @param   int           $areaId
+     * @return  QueryBuilder
+     */
+    public function scopeFilterArea($query, $areaId) {
+        return $query->where('forum_area_id', $areaId);
+    }
+
+
+    /**
+     * Filter topic.
+     *
+     * @param   QueryBuilder  $query
      * @param   int           $topicId
      * @return  QueryBuilder
      */
@@ -138,55 +151,26 @@ class Post extends Model {
      * @return  QueryBuilder
      */
     public function scopeSearch($query, $search) {
-        $search = trim($search);
+        $parsed = Search::parseQuery(
+            $search,
+            ['post'],
+            ['post' => 'post', 'author' => 'author', 'by' => 'author']
+        );
 
-        if (strlen($search)) {
-
-            // Parse search
-            $post = [];
-            $author = [];
-
-            $words = explode(' ', mb_strtolower($search));
-            foreach ($words as $word) {
-                $tokens = explode(':', $word, 2);
-
-                // Defaults to topic and post
-                if (count($tokens) == 1) {
-                    $topic[] = $post[] = $word;
-
-                    continue;
-                }
-
-                switch ($tokens[0]) {
-                    case 'author':
-                    case 'by':
-                        $author += explode(',', $tokens[1]);
-                        break;
-
-                    case 'post':
-                        $post[] = $tokens[1];
-                        break;
-
-                    default:
-                        $topic[] = $post[] = $word;
-
-                }
-            }
-
-            // Search authors?
-            $authors = $author
-                ? User::whereIn(DB::raw('LOWER(username)'), $author)
-                    ->lists('id')
-                : [];
-
-            if ($post) {
-                $query->searchWhere(implode(' ', $post), 'post');
-            }
-
-            if ($authors) {
-                $query->whereIn('author_id', $authors);
-            }
+        // Search authors
+        $authors = !empty($parsed['author'])
+            ? User::whereIn(DB::raw('LOWER(username)'), $parsed['author'])
+                ->lists('id')
+            : [];
+        if ($authors) {
+            $query->whereIn('author_id', $authors);
         }
+
+        // Search posts
+        if (!empty($parsed['post'])) {
+            $query->searchWhere(implode(' ', $parsed['post']), 'post');
+        }
+
 
         return $query;
     }
